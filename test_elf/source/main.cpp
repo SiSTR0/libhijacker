@@ -1,3 +1,4 @@
+#include "main.h"
 
 extern "C" {
 	#include <ps5/payload_main.h>
@@ -7,10 +8,28 @@ extern "C" {
 	#include <string.h>
 	#include <stdio.h>
 	#include <unistd.h>
+	#include <stdarg.h>
 	ssize_t _write(int, const void *, size_t);
 	void kernel_copyin(const void *src, uint64_t kdest, size_t length);
 	void kernel_copyout(uint64_t ksrc, void *dest, size_t length);
 	extern uintptr_t kernel_base;
+}
+
+void printf_notification(const char *fmt, ...) {
+	SceNotificationRequest noti_buffer;
+
+	va_list args;
+	va_start(args, fmt);
+	vsprintf(noti_buffer.message, fmt, args);
+	va_end(args);
+
+	noti_buffer.type = 0;
+	noti_buffer.unk3 = 0;
+	noti_buffer.use_icon_image_uri = 1;
+	noti_buffer.target_id = -1;
+	strcpy(noti_buffer.uri, "cxml://psnotification/tex_icon_system");
+
+	sceKernelSendNotificationRequest(0, (SceNotificationRequest * ) & noti_buffer, sizeof(noti_buffer), 0);
 }
 
 class Buffer {
@@ -93,6 +112,7 @@ Socket connect() {
 constexpr size_t KERNEL_DATA_SIZE = 0x87BF000;
 
 int main() {
+	printf_notification("Hello by test_elf.elf");
 	Buffer buf{};
 	Socket sock = connect();
 	dup2(sock.getFd(), 1);

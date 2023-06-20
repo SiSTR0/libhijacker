@@ -19,7 +19,7 @@ extern "C" p_mdbg_call _mdbg = nullptr;
 extern "C" int sceKernelDlsym(int handle, const char* symbol, void** addrp);
 extern "C" int *__error();
 
-int __attribute__((naked, noinline)) syscall_mdbg_call(void *arg1, void *arg2, void *arg3) {
+int __attribute__((naked, noinline)) syscall_mdbg_call([[maybe_unused]] void *arg1, [[maybe_unused]] void *arg2, [[maybe_unused]] void *arg3) {
 	asm (
 		"mov $573, %rax\n"
 		"call *_mdbg(%rip)\n"
